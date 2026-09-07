@@ -12,11 +12,12 @@ REPO_NAME = os.environ.get("GITHUB_REPOSITORY", "sarkablasko/cbtrebova-youtube-t
 
 
 def get_ytdlp_base_cmd():
-    """Zakladni parametry s podporou JS challenge a cookies."""
+    """Zakladni parametry s emulaci mobilnich klientu."""
     cmd = [
         "yt-dlp",
         "--js-runtimes", "node",
-        "--remote-components", "ejs:github"
+        "--remote-components", "ejs:github",
+        "--extractor-args", "youtube:player_client=ios,mweb"
     ]
     if os.path.exists("cookies.txt"):
         cmd.extend(["--cookies", "cookies.txt"])
