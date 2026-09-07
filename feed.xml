@@ -1,16 +1,24 @@
-<?xml version='1.0' encoding='utf-8'?>
-<rss xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" version="2.0">
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+     xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+     xmlns:content="http://purl.org/rss/1.0/modules/content/"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:podcast="https://podcastindex.org/namespace/1.0">
   <channel>
     <title>Kázání CB Česká Třebová</title>
     <link>https://www.youtube.com/@cbtrebova</link>
     <language>cs</language>
+    <atom:link href="https://raw.githubusercontent.com/sarkablasko/cbtrebova-youtube-to-spotify/main/feed.xml" rel="self" type="application/rss+xml"/>
     <itunes:author>CB Česká Třebová</itunes:author>
     <description>Záznamy nedělních kázání sboru Církve bratrské v České Třebové.</description>
-    <itunes:image href="https://raw.githubusercontent.com/sarkablasko/cbtrebova-podcast/main/cover.jpg" />
+    <itunes:image href="https://raw.githubusercontent.com/sarkablasko/cbtrebova-youtube-to-spotify/main/cover.png"/>
     <itunes:explicit>no</itunes:explicit>
+    <itunes:category text="Religion &amp; Spirituality">
+      <itunes:category text="Christianity"/>
+    </itunes:category>
     <itunes:owner>
       <itunes:name>CB Česká Třebová</itunes:name>
-      <itunes:email>vas-email@domena.cz</itunes:email>
+      <itunes:email>promitani@cbtrebova.cz</itunes:email>
     </itunes:owner>
-  <item><title>Ticho léčí, opravdu? (Jan 21, 15-22) Kázání 16. 8. 2026</title><description>Slovo bude mít Mirek Dostálek</description><guid isPermaLink="false">sermon_9yeMBk-RDFE.mp3</guid><pubDate>Mon, 07 Sep 2026 09:57:12 +0000</pubDate><enclosure url="https://github.com/sarkablasko/cbtrebova-youtube-to-spotify/releases/download/ep-20260907/sermon_9yeMBk-RDFE.mp3" length="77993133" type="audio/mpeg" /><itunes:duration>4874</itunes:duration><itunes:image href="https://github.com/sarkablasko/cbtrebova-youtube-to-spotify/releases/download/ep-20260907/cover_9yeMBk-RDFE.jpg" /></item></channel>
+  </channel>
 </rss>
