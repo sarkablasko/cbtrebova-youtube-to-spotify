@@ -11,16 +11,15 @@ REPO_NAME = os.environ.get("GITHUB_REPOSITORY", "sarkablasko/cbtrebova-youtube-t
 
 
 def get_ytdlp_base_cmd():
-    """Zakladni parametry pro obejiti bot filtru a JS runtime."""
+    """Zakladni parametry s podporou JS challenge a cookies."""
     cmd = [
         "yt-dlp",
-        "--extractor-args", "youtube:player_client=android",
-        "--js-runtimes", "node"
+        "--js-runtimes", "node",
+        "--remote-components", "ejs:github"
     ]
     if os.path.exists("cookies.txt"):
         cmd.extend(["--cookies", "cookies.txt"])
     return cmd
-
 
 def run(cmd):
     res = subprocess.run(cmd, capture_output=True, text=True)
