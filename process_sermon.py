@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import re
 import subprocess
 import sys
 from xml.etree import ElementTree as ET
@@ -91,21 +92,42 @@ def process_media(video_id):
              final_audio])))
     size = os.path.getsize(final_audio)
 
+    # Generování obalu s fallbackem
     cover_file = f"cover_{video_id}.jpg"
+    has_unique_cover = False
     if thumb_url:
+        temp_thumb = f"temp_{video_id}.jpg"
+        download_img_cmd = ["ffmpeg", "-y", "-i", thumb_url, temp_thumb]
+        run(download_img_cmd)
+
+        # Automatická detekce černých okrajů
+        detect_cmd = ["ffmpeg", "-i", temp_thumb, "-vframes", "1", "-f", "null", "-vf", "cropdetect", "-"]
+        res_detect = subprocess.run(detect_cmd, capture_output=True, text=True)
+
+        crop_filter = ""
+        matches = re.findall(r'crop=(\d+:\d+:\d+:\d+)', res_detect.stderr)
+        if matches:
+            crop_filter = f"crop={matches[-1]},"
+
+        # Aplikace ořezu a následné rozostření pozadí
         ff_img_cmd = [
-            "ffmpeg", "-y", "-i", thumb_url,
+            "ffmpeg", "-y", "-i", temp_thumb,
             "-vf",
-            "split[a][b];[a]scale=3000:3000:flags=lanczos,boxblur=25:5[bg];[b]scale=3000:-1:flags=lanczos[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2",
+            f"{crop_filter}split[a][b];[a]scale=3000:3000:flags=lanczos,boxblur=25:5[bg];[b]scale=3000:-1:flags=lanczos[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2",
             "-q:v", "2",
             cover_file
         ]
         run(ff_img_cmd)
+
+        if os.path.exists(temp_thumb):
+            os.remove(temp_thumb)
+
+        if os.path.exists(cover_file) and os.path.getsize(cover_file) > 0:
+            has_unique_cover = True
     else:
-        cover_file = None
+        cover_file = None # Pokud není specifický obal, použije se globální cover.png z feedu
 
     return final_audio, cover_file, title, description, size, dur
-
 
 def update_feed(audio_file, cover_file, title, description, size, dur, release_tag):
     ET.register_namespace("itunes", "http://www.itunes.com/dtds/podcast-1.0.dtd")
