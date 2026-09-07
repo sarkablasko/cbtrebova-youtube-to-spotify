@@ -46,9 +46,9 @@ def process_media(video_id):
     info_cmd = get_ytdlp_base_cmd() + ["-j", f"https://www.youtube.com/watch?v={video_id}"]
     info = json.loads(run(info_cmd))
 
-    title = info.get("title", f"Kázání {datetime.date.today()}")
-    description = info.get("description", "")
-    chapters = info.get("chapters", [])
+    title = info.get("title") or f"Kázání {datetime.date.today()}"
+    description = info.get("description") or ""
+    chapters = info.get("chapters") or []
     thumb_url = info.get("thumbnail")
 
     start_time, end_time = None, None
