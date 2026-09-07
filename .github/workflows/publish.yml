@@ -27,6 +27,13 @@ jobs:
           sudo apt-get install -y ffmpeg
           pip install yt-dlp
 
+      - name: Priprava YouTube cookies
+              if: "${{ env.YT_COOKIES != '' }}"
+              run: |
+                echo "$YT_COOKIES" > cookies.txt
+              env:
+                YT_COOKIES: ${{ secrets.YOUTUBE_COOKIES }}
+
       - name: Zpracovani kazani
         id: process
         run: |
