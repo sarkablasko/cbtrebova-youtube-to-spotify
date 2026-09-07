@@ -8,7 +8,7 @@
     <title>Kázání CB Česká Třebová</title>
     <link>https://www.youtube.com/@cbtrebova</link>
     <language>cs</language>
-    <atom:link href="https://raw.githubusercontent.com/sarkablasko/cbtrebova-youtube-to-spotify/main/feed.xml" rel="self" type="application/rss+xml"/>
+    <atom:link rel="self" href="https://raw.githubusercontent.com/sarkablasko/cbtrebova-youtube-to-spotify/main/feed.xml" type="application/rss+xml"/>
     <itunes:author>CB Česká Třebová</itunes:author>
     <description>Záznamy nedělních kázání sboru Církve bratrské v České Třebové.</description>
     <itunes:image href="https://raw.githubusercontent.com/sarkablasko/cbtrebova-youtube-to-spotify/main/cover.png"/>
