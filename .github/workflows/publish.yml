@@ -34,6 +34,17 @@ jobs:
           cat run.log
           echo "tag=$(grep OUTPUT_TAG run.log | cut -d'=' -f2)" >> $GITHUB_OUTPUT
           echo "file=$(grep OUTPUT_FILE run.log | cut -d'=' -f2)" >> $GITHUB_OUTPUT
+          echo "cover=$(grep OUTPUT_COVER run.log | cut -d'=' -f2 || true)" >> $GITHUB_OUTPUT
+
+      - name: Nahrani audia a obalu do GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.process.outputs.tag }}
+          files: |
+            ${{ steps.process.outputs.file }}
+            ${{ steps.process.outputs.cover }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Vytvoreni GitHub Release a nahrani MP3
         uses: softprops/action-gh-release@v2

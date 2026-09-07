@@ -8,10 +8,7 @@
     <language>cs</language>
     <itunes:author>CB Česká Třebová</itunes:author>
     <description>Záznamy nedělních kázání sboru Církve bratrské v České Třebové.</description>
-    <itunes:image href="https://raw.githubusercontent.com/<VASE_UZIVATELSKE_JMENO>/cbtrebova-podcast/main/cover.jpg"/>
-    <itunes:category text="Religion &amp; Spirituality">
-      <itunes:category text="Christianity"/>
-    </itunes:category>
+    <itunes:image href="https://raw.githubusercontent.com/sarkablasko/cbtrebova-podcast/main/cover.jpg"/>
     <itunes:explicit>no</itunes:explicit>
     <itunes:owner>
       <itunes:name>CB Česká Třebová</itunes:name>
