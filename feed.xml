@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+     xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+     xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Kázání CB Česká Třebová</title>
+    <link>https://www.youtube.com/@cbtrebova</link>
+    <language>cs</language>
+    <itunes:author>CB Česká Třebová</itunes:author>
+    <description>Záznamy nedělních kázání sboru Církve bratrské v České Třebové.</description>
+    <itunes:image href="https://raw.githubusercontent.com/<VASE_UZIVATELSKE_JMENO>/cbtrebova-podcast/main/cover.jpg"/>
+    <itunes:category text="Religion &amp; Spirituality">
+      <itunes:category text="Christianity"/>
+    </itunes:category>
+    <itunes:explicit>no</itunes:explicit>
+    <itunes:owner>
+      <itunes:name>CB Česká Třebová</itunes:name>
+      <itunes:email>vas-email@domena.cz</itunes:email>
+    </itunes:owner>
+  </channel>
+</rss>

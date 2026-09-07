@@ -1,0 +1,52 @@
+name: Publikace kazani na podcast
+
+on:
+  schedule:
+    # Kazdou nedeli ve 13:30 UTC (14:30 / 15:30 SEČ dle letniho casu)
+    - cron: '30 13 * * 0'
+  workflow_dispatch: # Umoznuje manualni spusteni tlacitkem
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repozitare
+        uses: actions/checkout@v4
+
+      - name: Nastaveni Pythonu
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalace FFmpeg a yt-dlp
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          pip install yt-dlp
+
+      - name: Zpracovani kazani
+        id: process
+        run: |
+          python process_sermon.py > run.log
+          cat run.log
+          echo "tag=$(grep OUTPUT_TAG run.log | cut -d'=' -f2)" >> $GITHUB_OUTPUT
+          echo "file=$(grep OUTPUT_FILE run.log | cut -d'=' -f2)" >> $GITHUB_OUTPUT
+
+      - name: Vytvoreni GitHub Release a nahrani MP3
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.process.outputs.tag }}
+          files: ${{ steps.process.outputs.file }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Zapsani zmen do feed.xml
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add feed.xml
+          git commit -m "Aktualizace podcast feedu: ${{ steps.process.outputs.tag }}" || exit 0
+          git push
