@@ -10,6 +10,18 @@ FEED_FILE = "feed.xml"
 REPO_NAME = os.environ.get("GITHUB_REPOSITORY", "sarkablasko/cbtrebova-youtube-to-spotify")
 
 
+def get_ytdlp_base_cmd():
+    """Zakladni parametry pro obejiti bot filtru a JS runtime."""
+    cmd = [
+        "yt-dlp",
+        "--extractor-args", "youtube:player_client=android",
+        "--js-runtimes", "node"
+    ]
+    if os.path.exists("cookies.txt"):
+        cmd.extend(["--cookies", "cookies.txt"])
+    return cmd
+
+
 def run(cmd):
     res = subprocess.run(cmd, capture_output=True, text=True)
     if res.returncode != 0:
@@ -19,7 +31,12 @@ def run(cmd):
 
 
 def get_latest_stream_id():
-    cmd = ["yt-dlp", "--flat-playlist", "--dump-json", "--playlist-end", "1", CHANNEL_URL]
+    cmd = get_ytdlp_base_cmd() + [
+        "--flat-playlist",
+        "--dump-json",
+        "--playlist-end", "1",
+        CHANNEL_URL
+    ]
     out = run(cmd)
     if not out:
         raise RuntimeError("Nenalezen zadny stream.")
@@ -27,15 +44,14 @@ def get_latest_stream_id():
 
 
 def process_media(video_id):
-    info = json.loads(run(["yt-dlp", "-j", f"https://www.youtube.com/watch?v={video_id}"]))
+    info_cmd = get_ytdlp_base_cmd() + ["-j", f"https://www.youtube.com/watch?v={video_id}"]
+    info = json.loads(run(info_cmd))
 
-    # 1. Ziskani titulku a popisu z YouTube
     title = info.get("title", f"Kázání {datetime.date.today()}")
     description = info.get("description", "")
     chapters = info.get("chapters", [])
     thumb_url = info.get("thumbnail")
 
-    # Pokud v popisu existuje kapitola "Kazani", muzeme upravit titulek nebo casy
     start_time, end_time = None, None
     for ch in chapters:
         ch_name = ch.get("title", "").lower()
@@ -44,9 +60,14 @@ def process_media(video_id):
             end_time = ch.get("end_time")
             break
 
-    # 2. Zpracovani zvuku
     raw_audio = f"raw_{video_id}.mp3"
-    run(["yt-dlp", "-x", "--audio-format", "mp3", "-o", raw_audio, f"https://www.youtube.com/watch?v={video_id}"])
+    dl_cmd = get_ytdlp_base_cmd() + [
+        "-x",
+        "--audio-format", "mp3",
+        "-o", raw_audio,
+        f"https://www.youtube.com/watch?v={video_id}"
+    ]
+    run(dl_cmd)
 
     final_audio = f"sermon_{video_id}.mp3"
     ff_audio_cmd = ["ffmpeg", "-y", "-i", raw_audio]
@@ -71,7 +92,6 @@ def process_media(video_id):
              final_audio])))
     size = os.path.getsize(final_audio)
 
-    # 3. Zpracovani nahledoveho obrazku (prevedeni 16:9 na ctverec 3000x3000 px)
     cover_file = f"cover_{video_id}.jpg"
     if thumb_url:
         ff_img_cmd = [
@@ -101,10 +121,8 @@ def update_feed(audio_file, cover_file, title, description, size, dur, release_t
 
     item = ET.Element("item")
     ET.SubElement(item, "title").text = title
-
     desc_elem = ET.SubElement(item, "description")
     desc_elem.text = description if description else title
-
     ET.SubElement(item, "guid", {"isPermaLink": "false"}).text = audio_file
     ET.SubElement(item, "pubDate").text = datetime.datetime.now(datetime.timezone.utc).strftime(
         "%a, %d %b %Y %H:%M:%S +0000")
@@ -115,7 +133,6 @@ def update_feed(audio_file, cover_file, title, description, size, dur, release_t
     dur_elem = ET.SubElement(item, "{http://www.itunes.com/dtds/podcast-1.0.dtd}duration")
     dur_elem.text = str(dur)
 
-    # Pridani specifickeho nahledu epizody
     if cover_file:
         img_url = f"https://github.com/{REPO_NAME}/releases/download/{release_tag}/{cover_file}"
         ET.SubElement(item, "{http://www.itunes.com/dtds/podcast-1.0.dtd}image", {"href": img_url})
