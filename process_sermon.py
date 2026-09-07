@@ -100,20 +100,44 @@ def process_media(video_id):
         download_img_cmd = ["ffmpeg", "-y", "-i", thumb_url, temp_thumb]
         run(download_img_cmd)
 
-        # Automatická detekce černých okrajů
-        detect_cmd = ["ffmpeg", "-i", temp_thumb, "-vframes", "1", "-f", "null", "-vf", "cropdetect", "-"]
+        # Automatická detekce okrajů s vyšší tolerancí na šum komprese (limit=35)
+        detect_cmd = [
+            "ffmpeg", "-i", temp_thumb,
+            "-vframes", "1",
+            "-vf", "cropdetect=limit=35:round=2:reset=0",
+            "-f", "null", "-"
+        ]
         res_detect = subprocess.run(detect_cmd, capture_output=True, text=True)
 
-        crop_filter = ""
-        matches = re.findall(r'crop=(\d+:\d+:\d+:\d+)', res_detect.stderr)
-        if matches:
-            crop_filter = f"crop={matches[-1]},"
+        matches = re.findall(r'crop=(\d+):(\d+):(\d+):(\d+)', res_detect.stderr)
 
-        # Aplikace ořezu a následné rozostření pozadí
+        if matches:
+            w, h, x, y = map(int, matches[-1])
+            aspect = w / h
+
+            # Pokud je obsah přibližně čtvercový (tolerance 0.8 až 1.25)
+            if 0.8 <= aspect <= 1.25:
+                # Ořez na přesný středový čtverec 1:1 bez rozostřeného pozadí
+                side = min(w, h)
+                crop_x = x + (w - side) // 2
+                crop_y = y + (h - side) // 2
+                vf = f"crop={side}:{side}:{crop_x}:{crop_y},scale=3000:3000:flags=lanczos"
+            else:
+                # Plnohodnotný 16:9 obrázek -> rozostřené pruhy nahoře a dole
+                vf = (
+                    f"crop={w}:{h}:{x}:{y},"
+                    "split[a][b];"
+                    "[a]scale=3000:3000:flags=lanczos,boxblur=25:5[bg];"
+                    "[b]scale=3000:-1:flags=lanczos[fg];"
+                    "[bg][fg]overlay=(W-w)/2:(H-h)/2"
+                )
+        else:
+            # Fallback při selhání detekce
+            vf = "split[a][b];[a]scale=3000:3000:flags=lanczos,boxblur=25:5[bg];[b]scale=3000:-1:flags=lanczos[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2"
+
         ff_img_cmd = [
             "ffmpeg", "-y", "-i", temp_thumb,
-            "-vf",
-            f"{crop_filter}split[a][b];[a]scale=3000:3000:flags=lanczos,boxblur=25:5[bg];[b]scale=3000:-1:flags=lanczos[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2",
+            "-vf", vf,
             "-q:v", "2",
             cover_file
         ]
